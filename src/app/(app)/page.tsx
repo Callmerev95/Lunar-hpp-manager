@@ -17,19 +17,20 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: recipes } = await supabase
-    .from("recipes")
-    .select("id, name, output_qty, output_unit, margin_pct, created_at")
-    .order("created_at", { ascending: false });
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit");
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at");
-  const { data: recipeMaterials } = await supabase
-    .from("recipe_materials")
-    .select("id, recipe_id, material_id, qty, unit, sort_order");
+  const [{ data: recipes }, { data: materials }, { data: prices }, { data: recipeMaterials }] =
+    await Promise.all([
+      supabase
+        .from("recipes")
+        .select("id, name, output_qty, output_unit, margin_pct, created_at")
+        .order("created_at", { ascending: false }),
+      supabase.from("materials").select("id, name, kind, buy_unit"),
+      supabase
+        .from("material_prices")
+        .select("id, material_id, price, qty, unit, effective_at"),
+      supabase
+        .from("recipe_materials")
+        .select("id, recipe_id, material_id, qty, unit, sort_order"),
+    ]);
 
   const byRecipe = new Map<string, typeof recipeMaterials>();
   for (const rm of recipeMaterials ?? []) {

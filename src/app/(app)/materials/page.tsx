@@ -17,15 +17,16 @@ export const metadata = {
 
 export default async function MaterialsPage() {
   const supabase = await createClient();
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit")
-    .order("name", { ascending: true });
-
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at")
-    .order("effective_at", { ascending: true });
+  const [{ data: materials }, { data: prices }] = await Promise.all([
+    supabase
+      .from("materials")
+      .select("id, name, kind, buy_unit")
+      .order("name", { ascending: true }),
+    supabase
+      .from("material_prices")
+      .select("id, material_id, price, qty, unit, effective_at")
+      .order("effective_at", { ascending: true }),
+  ]);
 
   const latest = latestPrices(prices ?? []);
 

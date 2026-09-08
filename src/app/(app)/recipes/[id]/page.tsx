@@ -31,28 +31,28 @@ export default async function RecipeDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: recipe } = await supabase
-    .from("recipes")
-    .select("id, name, output_qty, output_unit, margin_pct, notes, created_at")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: recipe }, { data: recipeMaterials }, { data: materials }, { data: prices }] =
+    await Promise.all([
+      supabase
+        .from("recipes")
+        .select("id, name, output_qty, output_unit, margin_pct, notes, created_at")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("recipe_materials")
+        .select("id, recipe_id, material_id, qty, unit, sort_order")
+        .eq("recipe_id", id)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("materials")
+        .select("id, name, kind, buy_unit")
+        .order("name", { ascending: true }),
+      supabase
+        .from("material_prices")
+        .select("id, material_id, price, qty, unit, effective_at"),
+    ]);
 
   if (!recipe) notFound();
-
-  const { data: recipeMaterials } = await supabase
-    .from("recipe_materials")
-    .select("id, recipe_id, material_id, qty, unit, sort_order")
-    .eq("recipe_id", id)
-    .order("sort_order", { ascending: true });
-
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit")
-    .order("name", { ascending: true });
-
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at");
 
   const cost = calculateRecipeCost({
     recipe,

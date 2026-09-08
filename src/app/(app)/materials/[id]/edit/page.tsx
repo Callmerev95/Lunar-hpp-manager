@@ -16,24 +16,25 @@ export default async function EditMaterialPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: material } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit, notes")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: material }, { data: prices }, { count: usageCount }] =
+    await Promise.all([
+      supabase
+        .from("materials")
+        .select("id, name, kind, buy_unit, notes")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("material_prices")
+        .select("id, material_id, price, qty, unit, effective_at")
+        .eq("material_id", id)
+        .order("effective_at", { ascending: false }),
+      supabase
+        .from("recipe_materials")
+        .select("id", { count: "exact", head: true })
+        .eq("material_id", id),
+    ]);
 
   if (!material) notFound();
-
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at")
-    .eq("material_id", id)
-    .order("effective_at", { ascending: false });
-
-  const { count: usageCount } = await supabase
-    .from("recipe_materials")
-    .select("id", { count: "exact", head: true })
-    .eq("material_id", id);
 
   return (
     <div className="space-y-6">

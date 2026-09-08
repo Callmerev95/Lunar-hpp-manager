@@ -204,11 +204,22 @@ export async function GET(
     return NextResponse.json({ error: "Belum masuk." }, { status: 401 });
   }
 
-  const { data: recipe } = await supabase
-    .from("recipes")
-    .select("id, name, output_qty, output_unit, margin_pct")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: recipe }, { data: recipeMaterials }, { data: materials }, { data: prices }] =
+    await Promise.all([
+      supabase
+        .from("recipes")
+        .select("id, name, output_qty, output_unit, margin_pct")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("recipe_materials")
+        .select("id, recipe_id, material_id, qty, unit, sort_order")
+        .eq("recipe_id", id),
+      supabase.from("materials").select("id, name, kind, buy_unit"),
+      supabase
+        .from("material_prices")
+        .select("id, material_id, price, qty, unit, effective_at"),
+    ]);
 
   if (!recipe) {
     return NextResponse.json(
@@ -216,17 +227,6 @@ export async function GET(
       { status: 404 },
     );
   }
-
-  const { data: recipeMaterials } = await supabase
-    .from("recipe_materials")
-    .select("id, recipe_id, material_id, qty, unit, sort_order")
-    .eq("recipe_id", id);
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit");
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at");
 
   const cost = calculateRecipeCost({
     recipe,

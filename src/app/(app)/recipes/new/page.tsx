@@ -7,13 +7,15 @@ export const metadata = {
 
 export default async function NewRecipePage() {
   const supabase = await createClient();
-  const { data: materials } = await supabase
-    .from("materials")
-    .select("id, name, kind, buy_unit")
-    .order("name", { ascending: true });
-  const { data: prices } = await supabase
-    .from("material_prices")
-    .select("id, material_id, price, qty, unit, effective_at");
+  const [{ data: materials }, { data: prices }] = await Promise.all([
+    supabase
+      .from("materials")
+      .select("id, name, kind, buy_unit")
+      .order("name", { ascending: true }),
+    supabase
+      .from("material_prices")
+      .select("id, material_id, price, qty, unit, effective_at"),
+  ]);
 
   return (
     <div className="space-y-6">
