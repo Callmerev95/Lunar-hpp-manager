@@ -3,6 +3,8 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { AuthBranding } from "@/components/auth/auth-branding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +29,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [errors, setErrors] = useState<AuthError[]>([]);
   const [pending, setPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const notice = searchParams.get("registered")
     ? "Akun dibuat. Silakan masuk."
@@ -43,61 +46,92 @@ function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-2xl">Masuk</CardTitle>
-        <CardDescription>Lanjut menghitung biaya produksimu.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form action={action} className="space-y-4">
-          {notice ? (
-            <p className="text-sm text-foreground">{notice}</p>
-          ) : null}
-          {errors.map((e, i) => (
-            <p
-              key={i}
-              role="alert"
-              className="text-sm text-destructive"
+    <div>
+      <AuthBranding />
+      <Card className="[--card-spacing:--spacing(6)]">
+        <CardHeader className="text-center">
+          <CardTitle className="font-heading text-2xl font-bold">
+            Selamat datang
+          </CardTitle>
+          <CardDescription>
+            Lanjut menghitung biaya produksimu.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={action} className="space-y-4">
+            {notice ? (
+              <p className="text-center text-sm text-primary">{notice}</p>
+            ) : null}
+            {errors.map((e, i) => (
+              <p
+                key={i}
+                role="alert"
+                className="text-center text-sm text-destructive"
+              >
+                {e.message}
+              </p>
+            ))}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="h-11 rounded-xl pl-10 font-sans"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  className="h-11 rounded-xl pl-10 pr-10 font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={
+                    showPassword ? "Sembunyikan password" : "Tampilkan password"
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={pending}
+              className="h-11 w-full font-semibold"
             >
-              {e.message}
-            </p>
-          ))}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="font-sans"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="font-sans"
-            />
-          </div>
-          <Button type="submit" disabled={pending} className="w-full">
-            {pending ? "Memasuki..." : "Masuk"}
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            Belum punya akun?{" "}
-            <Link
-              href="/register"
-              className="underline underline-offset-4 hover:text-foreground"
-            >
-              Daftar
-            </Link>
-          </p>
-        </form>
-      </CardContent>
-    </Card>
+              {pending ? "Memasuki..." : "Masuk"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Belum punya akun?{" "}
+        <Link
+          href="/register"
+          className="font-semibold text-primary hover:underline"
+        >
+          Daftar sekarang
+        </Link>
+      </p>
+    </div>
   );
 }
