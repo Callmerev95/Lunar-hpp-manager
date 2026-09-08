@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Fraunces, Public_Sans } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
-});
-
-const publicSans = Public_Sans({
-  variable: "--font-public-sans",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      className={`${fraunces.variable} ${publicSans.variable} h-full antialiased`}
+      className={`${nunito.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

@@ -23,10 +23,15 @@ Direction ini disusun dari jawaban pemilik produk. Aplikasi: kalkulator HPP (har
 
 ## Typography
 
-- Judul: serif hangat (kelas Fraunces/Playfair: karakter adonan yang organik). Dipakai untuk nama resep, nama bahan, angka besar HPP.
-- Body: sans bersih untuk tabel, form, dan angka rutin. Keterbacaan pertama.
+- Font aplikasi: **Nunito** (sans bulat hangat) untuk judul dan body — pivot dari Fraunces+Public Sans mengikuti Figma design pemilik (2026-09-08). Semua `--font-sans`, `--font-heading`, `--font-mono` = Nunito.
 - Angka uang: tabular (lining) numerals supaya kolom angka rata.
-- Alasan: serif judul memberi identitas artisanal, sans body menjaga tabel angka tetap terbaca.
+- Alasan: Nunito dipilih pemilik dari design Figma; keterbacaan tetap utama.
+
+## Background & Card (pivot Figma, 2026-09-08)
+
+- Body: gradasi halus krem → putih (`#FDF6ED` → `#FFFFFF`), fixed. Dark: gradasi hangat gelap.
+- Kartu: putih solid, `rounded-2xl`, border `#EFE3D3`, shadow lembut `rgba(123,81,56,0.06)`.
+- Tombol: pil (`rounded-full`). Nav: tab pil tersegmentasi, aktif karamel.
 
 ## Mood
 
