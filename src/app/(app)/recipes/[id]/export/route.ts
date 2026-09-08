@@ -54,13 +54,21 @@ function styleFor(kind: Row["style"], col: number): XLSX.CellStyle {
     case "total":
       return {
         font: { bold: true },
-        alignment: { horizontal: "left", vertical: "center" },
+        alignment: {
+          horizontal: col === 4 ? "right" : "left",
+          vertical: "center",
+        },
+        numFmt: col === 4 ? "#,##0.##" : undefined,
       };
     case "highlight":
       return {
         font: { bold: true, color: { rgb: CARAMEL } },
         fill: { fgColor: { rgb: SOFT } },
-        alignment: { horizontal: "left", vertical: "center" },
+        alignment: {
+          horizontal: col === 4 ? "right" : "left",
+          vertical: "center",
+        },
+        numFmt: col === 4 ? "#,##0.##" : undefined,
       };
     default:
       return {};
