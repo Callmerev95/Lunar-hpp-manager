@@ -4,21 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export type AuthError = {
-  field?: "email" | "password";
-  message: string;
-};
-
-export async function loginAction(
-  formData: FormData,
-): Promise<AuthError | undefined> {
+export async function loginAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
-    return { message: "Email dan password wajib diisi." };
+    redirect("/login?error=" + encodeURIComponent("Email dan password wajib diisi."));
   }
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -27,29 +20,33 @@ export async function loginAction(
   });
 
   if (error) {
-    if (error.message.toLowerCase().includes("invalid login credentials")) {
-      return { field: "email", message: "Email atau password salah." };
-    }
-    return { message: error.message };
+    const message = error.message
+      .toLowerCase()
+      .includes("invalid login credentials")
+      ? "Email atau password salah."
+      : error.message;
+    redirect("/login?error=" + encodeURIComponent(message));
   }
 
   revalidatePath("/", "layout");
   redirect("/");
 }
 
-export async function registerAction(
-  formData: FormData,
-): Promise<AuthError | undefined> {
+export async function registerAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (!email || !password) {
-    return { message: "Email dan password wajib diisi." };
+    redirect("/register?error=" + encodeURIComponent("Email dan password wajib diisi."));
   }
   if (password.length < 6) {
-    return { field: "password", message: "Password minimal 6 karakter." };
+    redirect("/register?error=" + encodeURIComponent("Password minimal 6 karakter."));
+  }
+  if (password !== confirmPassword) {
+    redirect("/register?error=" + encodeURIComponent("Konfirmasi password tidak sama."));
   }
 
   const { error } = await supabase.auth.signUp({
@@ -59,7 +56,7 @@ export async function registerAction(
   });
 
   if (error) {
-    return { message: error.message };
+    redirect("/register?error=" + encodeURIComponent(error.message));
   }
 
   revalidatePath("/", "layout");

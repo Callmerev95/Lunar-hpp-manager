@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import { Providers } from "@/components/providers";
-import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  display: "optional",
 });
 
 export const metadata: Metadata = {
@@ -24,7 +23,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
-        <Toaster />
       </body>
     </html>
   );

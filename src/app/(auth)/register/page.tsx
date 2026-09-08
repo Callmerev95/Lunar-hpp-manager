@@ -1,10 +1,7 @@
-"use client";
-
-import { useState } from "react";
-import Link from "next/link";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { PasswordInput } from "./password-input";
+import { registerAction } from "../actions";
 import { AuthBranding } from "@/components/auth/auth-branding";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,29 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { registerAction, type AuthError } from "@/app/(auth)/actions";
 
-export default function RegisterPage() {
-  const [errors, setErrors] = useState<AuthError[]>([]);
-  const [pending, setPending] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  async function action(formData: FormData) {
-    const password = String(formData.get("password") ?? "");
-    const confirmPassword = String(formData.get("confirmPassword") ?? "");
-    if (password !== confirmPassword) {
-      setErrors([{ message: "Konfirmasi password tidak sama." }]);
-      return;
-    }
-    setPending(true);
-    setErrors([]);
-    const result = await registerAction(formData);
-    if (result) {
-      setErrors([result]);
-      setPending(false);
-    }
-  }
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { error } = await searchParams;
 
   return (
     <div>
@@ -59,104 +40,48 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
-          <form action={action} className="space-y-5">
-            {errors.map((e, i) => (
+          <form action={registerAction} className="space-y-5">
+            {error ? (
               <p
-                key={i}
                 role="alert"
                 className="text-center text-sm text-destructive"
               >
-                {e.message}
+                {error}
               </p>
-            ))}
+            ) : null}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="h-11 rounded-xl pl-10 font-sans"
-                />
-              </div>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="h-11 rounded-xl pl-10 font-sans"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  className="h-11 rounded-xl pl-10 pr-10 font-sans"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={
-                    showPassword ? "Sembunyikan password" : "Tampilkan password"
-                  }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
+              <PasswordInput autoComplete="new-password" />
               <p className="text-xs text-muted-foreground">
                 Minimal 6 karakter.
               </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Konfirmasi password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  className="h-11 rounded-xl pl-10 pr-10 font-sans"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  aria-label={
-                    showConfirm ? "Sembunyikan password" : "Tampilkan password"
-                  }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showConfirm ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
+              <PasswordInput autoComplete="new-password" confirm />
             </div>
-            <Button
-              type="submit"
-              disabled={pending}
-              className="h-11 w-full font-semibold"
-            >
-              {pending ? "Mendaftarkan..." : "Daftar"}
-            </Button>
+            <button type="submit" className={buttonVariants({ className: "h-11 w-full font-semibold" })}>
+              Daftar
+            </button>
           </form>
         </CardContent>
       </Card>
       <p className="mt-4 text-center text-sm text-muted-foreground">
         Sudah punya akun?{" "}
-        <Link href="/login" className="font-semibold text-primary hover:underline">
+        <a href="/login" className="font-semibold text-primary hover:underline">
           Masuk
-        </Link>
+        </a>
       </p>
     </div>
   );

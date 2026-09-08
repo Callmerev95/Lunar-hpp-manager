@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AppNav } from "@/components/app-nav";
+import { Toaster } from "@/components/ui/sonner";
 
 export default async function AppLayout({
   children,
@@ -48,6 +49,7 @@ export default async function AppLayout({
         </div>
       </header>
       <main className="flex-1 py-6">{children}</main>
+      <Toaster />
     </div>
   );
 }
