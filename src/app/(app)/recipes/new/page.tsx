@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { RecipeForm } from "@/components/recipes/recipe-form";
 
 export const metadata = {
-  title: "Resep baru - Catatan HPP",
+  title: "Resep baru - Lunar HPP",
 };
 
 export default async function NewRecipePage() {

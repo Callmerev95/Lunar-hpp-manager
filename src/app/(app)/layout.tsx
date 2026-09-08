@@ -32,7 +32,7 @@ export default async function AppLayout({
           </span>
           <span className="flex flex-col leading-tight">
             <span className="font-heading text-lg font-semibold">
-              Catatan HPP
+              Lunar HPP
             </span>
             <span className="text-xs text-muted-foreground">
               Kalkulator harga pokok produksi

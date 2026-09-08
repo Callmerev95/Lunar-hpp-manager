@@ -1,6 +1,6 @@
 # Architecture
 
-Catatan HPP / Lunar HPP Manager — an HPP (harga pokok produksi, cost of goods) calculator for Indonesian home-based food sellers. Live at https://lunar-hpp-manager.vercel.app.
+Lunar HPP Manager — an HPP (harga pokok produksi, cost of goods) calculator for Indonesian home-based food sellers. Live at https://lunar-hpp-manager.vercel.app.
 
 ## System overview
 

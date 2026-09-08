@@ -1,4 +1,4 @@
-# Catatan HPP — Lunar HPP Manager
+# Lunar HPP Manager
 
 > Real cost per portion for home-based food businesses. Built for home bakers who price by intuition — and shouldn't.
 

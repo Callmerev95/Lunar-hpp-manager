@@ -10,7 +10,7 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Catatan HPP",
+  title: "Lunar HPP",
   description: "Kalkulator harga pokok produksi untuk bahan makanan dan kue rumahan.",
 };
 

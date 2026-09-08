@@ -5,7 +5,7 @@ export function AuthBranding() {
         <span aria-hidden="true">🍪</span>
       </div>
       <h1 className="font-heading text-3xl font-bold text-[#7B5138] dark:text-primary">
-        Catatan HPP
+        Lunar HPP
       </h1>
       <p className="mt-1.5 text-sm text-muted-foreground">
         Kalkulator harga pokok produksi untuk jualan kue dan makanan rumahan

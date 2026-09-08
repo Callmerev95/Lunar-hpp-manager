@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { RecipeForm } from "@/components/recipes/recipe-form";
 
 export const metadata = {
-  title: "Ubah resep - Catatan HPP",
+  title: "Ubah resep - Lunar HPP",
 };
 
 export default async function EditRecipePage({

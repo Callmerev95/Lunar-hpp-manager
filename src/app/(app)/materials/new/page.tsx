@@ -1,7 +1,7 @@
 import { MaterialForm } from "@/components/materials/material-form";
 
 export const metadata = {
-  title: "Bahan baru - Catatan HPP",
+  title: "Bahan baru - Lunar HPP",
 };
 
 export default function NewMaterialPage() {

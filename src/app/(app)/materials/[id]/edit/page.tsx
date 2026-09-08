@@ -5,7 +5,7 @@ import { PriceHistoryCard } from "@/components/materials/price-history-card";
 import { DeleteMaterialButton } from "@/components/materials/delete-material-button";
 
 export const metadata = {
-  title: "Ubah bahan - Catatan HPP",
+  title: "Ubah bahan - Lunar HPP",
 };
 
 export default async function EditMaterialPage({

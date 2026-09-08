@@ -12,7 +12,7 @@ import { latestPrices } from "@/lib/costing/prices";
 import { MaterialsList, type MaterialCardItem } from "@/components/materials/materials-list";
 
 export const metadata = {
-  title: "Bahan - Catatan HPP",
+  title: "Bahan - Lunar HPP",
 };
 
 export default async function MaterialsPage() {

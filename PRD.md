@@ -1,4 +1,4 @@
-# PRD — Catatan HPP (Lunar HPP Manager)
+# PRD — Lunar HPP Manager
 
 Version: 1.0 — 2026-09-08
 Status: Shipped (v1 live at https://lunar-hpp-manager.vercel.app)

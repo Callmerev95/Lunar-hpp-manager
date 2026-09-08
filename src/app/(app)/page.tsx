@@ -12,7 +12,7 @@ import { calculateRecipeCost } from "@/lib/costing/recipe";
 import { RecipesList, type RecipeCardItem } from "@/components/recipes/recipes-list";
 
 export const metadata = {
-  title: "Resep - Catatan HPP",
+  title: "Resep - Lunar HPP",
 };
 
 export default async function DashboardPage() {
