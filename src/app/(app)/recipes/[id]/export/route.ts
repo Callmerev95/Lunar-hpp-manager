@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { createClient } from "@/lib/supabase/server";
 import { calculateRecipeCost } from "@/lib/costing/recipe";
 
@@ -11,59 +11,160 @@ type RecipeForExport = {
   margin_pct: number;
 };
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
+type Cell = string | number;
+type Row = { cells: Cell[]; style?: "title" | "meta" | "thead" | "tbody" | "warn" | "total" | "highlight" };
+
+const CARAMEL = "FF7B5138";
+const CREAM = "FFFFF6EC";
+const SOFT = "FFF3E5D5";
+const GREY = "FF8A8378";
+const BORDER = { style: "thin", color: { rgb: "FFD9CFC2" } } as const;
+
+function styleFor(kind: Row["style"], col: number): XLSX.CellStyle {
+  switch (kind) {
+    case "title":
+      return {
+        font: { bold: true, sz: 14, color: { rgb: CARAMEL } },
+        alignment: { horizontal: "left", vertical: "center" },
+      };
+    case "meta":
+      return {
+        font: { sz: 11, color: { rgb: GREY } },
+        alignment: { horizontal: "left", vertical: "center" },
+      };
+    case "thead":
+      return {
+        font: { bold: true, color: { rgb: CREAM } },
+        fill: { fgColor: { rgb: CARAMEL } },
+        alignment: { horizontal: col >= 1 && col <= 4 ? "right" : "left", vertical: "center" },
+        border: { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER },
+      };
+    case "tbody":
+      return {
+        alignment: { horizontal: col === 0 || col === 5 ? "left" : "right", vertical: "center" },
+        border: { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER },
+        numFmt: col === 1 ? "#,##0.##" : col === 3 || col === 4 ? "#,##0" : undefined,
+      };
+    case "warn":
+      return {
+        font: { italic: true, color: { rgb: GREY } },
+        alignment: { horizontal: "left", vertical: "center" },
+        border: { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER },
+      };
+    case "total":
+      return {
+        font: { bold: true },
+        alignment: { horizontal: "left", vertical: "center" },
+      };
+    case "highlight":
+      return {
+        font: { bold: true, color: { rgb: CARAMEL } },
+        fill: { fgColor: { rgb: SOFT } },
+        alignment: { horizontal: "left", vertical: "center" },
+      };
+    default:
+      return {};
+  }
 }
 
 function buildRows(
   recipe: RecipeForExport,
   cost: ReturnType<typeof calculateRecipeCost>,
   materialNameById: Map<string, string>,
-): (string | number)[][] {
-  return [
-    ["Nama resep", recipe.name],
-    ["Hasil", recipe.output_qty],
-    ["Unit hasil", recipe.output_unit],
-    ["Margin (%)", recipe.margin_pct],
-    [],
-    ["Bahan", "Qty", "Unit", "Harga satuan", "Subtotal", "Jenis"],
-    ...cost.items.map((item) => [
-      item.name,
-      round2(item.qty),
-      item.unit,
-      round2(item.unitCost),
-      round2(item.cost),
-      item.kind === "packaging" ? "Kemasan" : "Bahan baku",
-    ]),
-    ...cost.unresolvedUnits.map((u) => [
-      materialNameById.get(u.materialId) ?? "Bahan",
-      "",
-      u.unit,
-      "belum ada harga",
-      "",
-      "",
-    ]),
-    [],
-    ["Total bahan baku", round2(cost.totalMaterials)],
-    ["Total kemasan", round2(cost.totalPackaging)],
-    ["HPP total", round2(cost.totalCost)],
-    [`HPP per ${recipe.output_unit}`, round2(cost.perUnit)],
-    ["Harga jual saran", round2(cost.suggestedPrice)],
+): Row[] {
+  const rows: Row[] = [
+    { cells: [recipe.name], style: "title" },
+    {
+      cells: [
+        `Hasil: ${recipe.output_qty} ${recipe.output_unit} · Margin: ${recipe.margin_pct}% · HPP memakai harga bahan terbaru`,
+      ],
+      style: "meta",
+    },
+    { cells: [] },
+    {
+      cells: ["Bahan", "Qty", "Unit", "Harga satuan", "Subtotal", "Jenis"],
+      style: "thead",
+    },
+    ...cost.items.map(
+      (item): Row => ({
+        cells: [
+          item.name,
+          item.qty,
+          item.unit,
+          item.unitCost,
+          item.cost,
+          item.kind === "packaging" ? "Kemasan" : "Bahan baku",
+        ],
+        style: "tbody",
+      }),
+    ),
+    ...cost.unresolvedUnits.map(
+      (u): Row => ({
+        cells: [
+          materialNameById.get(u.materialId) ?? "Bahan",
+          "",
+          u.unit,
+          "belum ada harga",
+          "",
+          "",
+        ],
+        style: "warn",
+      }),
+    ),
+    { cells: [] },
+    { cells: ["Total bahan baku", "", "", "", cost.totalMaterials], style: "total" },
+    { cells: ["Total kemasan", "", "", "", cost.totalPackaging], style: "total" },
+    { cells: ["HPP total", "", "", "", cost.totalCost], style: "total" },
+    {
+      cells: [`HPP per ${recipe.output_unit}`, "", "", "", cost.perUnit],
+      style: "highlight",
+    },
+    {
+      cells: ["Harga jual saran", "", "", "", cost.suggestedPrice],
+      style: "highlight",
+    },
   ];
+  return rows;
 }
 
-function buildXlsxBuffer(
-  rows: (string | number)[][],
-): Uint8Array {
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws["!cols"] = [{ wch: 28 }, { wch: 10 }, { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 12 }];
+function buildXlsx(rows: Row[]): Uint8Array {
+  const maxCols = Math.max(...rows.map((r) => r.cells.length), 6);
+  const aoa: (Cell | null)[][] = rows.map((r) => {
+    const padded = [...r.cells];
+    while (padded.length < maxCols) padded.push("");
+    return padded;
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  rows.forEach((row, ri) => {
+    for (let ci = 0; ci < maxCols; ci++) {
+      const addr = XLSX.utils.encode_cell({ r: ri, c: ci });
+      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
+      if (row.style) (ws[addr] as XLSX.CellObject).s = styleFor(row.style, ci);
+    }
+  });
+
+  ws["!cols"] = [
+    { wch: 26 },
+    { wch: 10 },
+    { wch: 9 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 12 },
+  ];
+
+  ws["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
+  ];
+
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "HPP");
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
   return new Uint8Array(buf);
 }
 
-function csvCell(v: string | number): string {
+function csvCell(v: Cell): string {
   if (typeof v === "number") {
     return v.toLocaleString("id-ID", {
       minimumFractionDigits: 2,
@@ -73,8 +174,10 @@ function csvCell(v: string | number): string {
   return /[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 }
 
-function buildCsv(rows: (string | number)[][]): string {
-  const lines = rows.map((r) => r.map(csvCell).join(";"));
+function buildCsv(rows: Row[]): string {
+  const lines = rows
+    .filter((r) => r.cells.length > 0)
+    .map((r) => r.cells.map(csvCell).join(";"));
   return "\uFEFF" + lines.join("\n");
 }
 
@@ -144,7 +247,7 @@ export async function GET(
     });
   }
 
-  return new NextResponse(new Uint8Array(buildXlsxBuffer(rows)), {
+  return new NextResponse(new Uint8Array(buildXlsx(rows)), {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
