@@ -56,3 +56,7 @@ Direction ini disusun dari jawaban pemilik produk. Aplikasi: kalkulator HPP (har
 
 - Draft ini berdasar jawaban pemilik; bukan ditulis AI, bukan template.
 - Logo: belum ditentukan. Pakai placeholder teks nama produk sampai pemilik memutuskan (R-23).
+
+## Status
+
+- Shipped v1 (2026-09-08). Live: https://lunar-hpp-manager.vercel.app — production verified, sub-second TTFB after region colocation.
