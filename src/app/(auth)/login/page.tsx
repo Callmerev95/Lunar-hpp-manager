@@ -48,8 +48,8 @@ function LoginForm() {
   return (
     <div>
       <AuthBranding />
-      <Card className="[--card-spacing:--spacing(6)]">
-        <CardHeader className="text-center">
+      <Card className="min-h-[22rem] [--card-spacing:--spacing(6)]">
+        <CardHeader className="gap-2 pb-2 text-center">
           <CardTitle className="font-heading text-2xl font-bold">
             Selamat datang
           </CardTitle>
@@ -57,8 +57,8 @@ function LoginForm() {
             Lanjut menghitung biaya produksimu.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form action={action} className="space-y-4">
+        <CardContent className="pt-2">
+          <form action={action} className="space-y-5">
             {notice ? (
               <p className="text-center text-sm text-primary">{notice}</p>
             ) : null}

@@ -41,8 +41,8 @@ export default function RegisterPage() {
   return (
     <div>
       <AuthBranding />
-      <Card className="[--card-spacing:--spacing(6)]">
-        <CardHeader className="text-center">
+      <Card className="min-h-[26rem] [--card-spacing:--spacing(6)]">
+        <CardHeader className="gap-2 pb-2 text-center">
           <div
             className="mb-2 flex items-center justify-center gap-2"
             aria-hidden="true"
@@ -58,8 +58,8 @@ export default function RegisterPage() {
             Isi datamu untuk mulai mencatat bahan dan resepmu.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form action={action} className="space-y-4">
+        <CardContent className="pt-2">
+          <form action={action} className="space-y-5">
             {errors.map((e, i) => (
               <p
                 key={i}
