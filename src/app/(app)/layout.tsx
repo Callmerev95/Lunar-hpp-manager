@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AppNav } from "@/components/app-nav";
 
 export default async function AppLayout({
   children,
@@ -19,25 +20,25 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 sm:px-6">
-      <header className="flex items-center justify-between gap-4 border-b border-border py-4">
-        <Link href="/" className="font-heading text-lg font-semibold">
-          Catatan HPP
+    <div className="mx-auto flex w-full max-w-[52rem] flex-1 flex-col px-4 sm:px-6">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 py-4">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="inline-block text-2xl motion-safe:animate-[float_3s_ease-in-out_infinite]"
+          >
+            🍪
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span className="font-heading text-lg font-semibold">
+              Catatan HPP
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Kalkulator harga pokok produksi
+            </span>
+          </span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm" aria-label="Menu utama">
-          <Link
-            href="/"
-            className="rounded-md px-3 py-2 hover:bg-muted"
-          >
-            Resep
-          </Link>
-          <Link
-            href="/materials"
-            className="rounded-md px-3 py-2 hover:bg-muted"
-          >
-            Bahan
-          </Link>
-        </nav>
+        <AppNav />
         <div className="flex items-center gap-3">
           <span className="hidden max-w-[12rem] truncate text-sm text-muted-foreground sm:block">
             {user.email}

@@ -8,16 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { calculateRecipeCost } from "@/lib/costing/recipe";
-import { formatIDR, formatDate } from "@/lib/format";
+import { RecipesList, type RecipeCardItem } from "@/components/recipes/recipes-list";
 
 export const metadata = {
   title: "Resep - Catatan HPP",
@@ -46,14 +38,22 @@ export default async function DashboardPage() {
     byRecipe.set(rm.recipe_id, list);
   }
 
-  const rows = (recipes ?? []).map((r) => {
+  const rows: RecipeCardItem[] = (recipes ?? []).map((r) => {
     const cost = calculateRecipeCost({
       recipe: r,
       materials: materials ?? [],
       recipeMaterials: byRecipe.get(r.id) ?? [],
       prices: prices ?? [],
     });
-    return { ...r, perUnit: cost.perUnit, suggested: cost.suggestedPrice };
+    return {
+      id: r.id,
+      name: r.name,
+      output_qty: r.output_qty,
+      output_unit: r.output_unit,
+      margin_pct: r.margin_pct,
+      perUnit: cost.perUnit,
+      suggested: cost.suggestedPrice,
+    };
   });
 
   return (
@@ -66,63 +66,11 @@ export default async function DashboardPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/recipes/new">Resep baru</Link>
+          <Link href="/recipes/new">+ Resep Baru</Link>
         </Button>
       </div>
 
-      {!recipes || recipes.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">
-              {recipes.length} resep
-            </CardTitle>
-            <CardDescription>
-              Harga jual saran mengikuti margin tiap resep.
-            </CardDescription>
-          </CardHeader>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Hasil</TableHead>
-                  <TableHead className="text-right">HPP per unit</TableHead>
-                  <TableHead className="text-right">Harga saran</TableHead>
-                  <TableHead>Dibuat</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>
-                      <Link
-                        href={`/recipes/${r.id}`}
-                        className="font-medium underline-offset-4 hover:underline"
-                      >
-                        {r.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      {r.output_qty} {r.output_unit}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {formatIDR(r.perUnit)}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {formatIDR(r.suggested)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(r.created_at)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
-      )}
+      {!recipes || recipes.length === 0 ? <EmptyState /> : <RecipesList recipes={rows} />}
     </div>
   );
 }

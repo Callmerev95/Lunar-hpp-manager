@@ -8,24 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { latestPrices } from "@/lib/costing/prices";
-import { formatIDR, formatDate } from "@/lib/format";
+import { MaterialsList, type MaterialCardItem } from "@/components/materials/materials-list";
 
 export const metadata = {
   title: "Bahan - Catatan HPP",
-};
-
-const KIND_LABELS: Record<string, string> = {
-  raw: "Bahan baku",
-  packaging: "Kemasan",
 };
 
 export default async function MaterialsPage() {
@@ -42,6 +29,20 @@ export default async function MaterialsPage() {
 
   const latest = latestPrices(prices ?? []);
 
+  const items: MaterialCardItem[] = (materials ?? []).map((m) => {
+    const p = latest.get(m.id) ?? null;
+    return {
+      id: m.id,
+      name: m.name,
+      kind: m.kind,
+      buy_unit: m.buy_unit,
+      price: p ? p.price : null,
+      qty: p ? p.qty : null,
+      unit: p ? p.unit : null,
+      effective_at: p ? p.effective_at : null,
+    };
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -52,11 +53,11 @@ export default async function MaterialsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/materials/new">Tambah bahan</Link>
+          <Link href="/materials/new">+ Tambah Bahan</Link>
         </Button>
       </div>
 
-      {!materials || materials.length === 0 ? (
+      {items.length === 0 ? (
         <Card className="border-dashed">
           <CardHeader className="items-center gap-2 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
@@ -74,69 +75,7 @@ export default async function MaterialsPage() {
           </CardHeader>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">
-              {materials.length} bahan
-            </CardTitle>
-            <CardDescription>
-              Harga yang dipakai adalah yang paling baru.
-            </CardDescription>
-          </CardHeader>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>Jenis</TableHead>
-                  <TableHead>Unit beli</TableHead>
-                  <TableHead className="text-right">Harga terakhir</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {materials.map((m) => {
-                  const p = latest.get(m.id);
-                  return (
-                    <TableRow key={m.id}>
-                      <TableCell className="font-medium">{m.name}</TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {KIND_LABELS[m.kind] ?? m.kind}
-                        </span>
-                      </TableCell>
-                      <TableCell>{m.buy_unit}</TableCell>
-                      <TableCell className="text-right">
-                        {p ? (
-                          <span className="flex flex-col">
-                            <span className="tabular-nums">
-                              {formatIDR(p.price)} / {p.qty} {p.unit}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              sejak {formatDate(p.effective_at)}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            Belum ada harga
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Link
-                          href={`/materials/${m.id}/edit`}
-                          className="text-sm underline underline-offset-4 hover:text-foreground"
-                        >
-                          Ubah
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+        <MaterialsList materials={items} />
       )}
     </div>
   );
