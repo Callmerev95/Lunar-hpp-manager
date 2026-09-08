@@ -1,40 +1,29 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
+import { RecipeForm } from "@/components/recipes/recipe-form";
 
 export const metadata = {
   title: "Resep baru - Catatan HPP",
 };
 
-export default function NewRecipePage() {
+export default async function NewRecipePage() {
+  const supabase = await createClient();
+  const { data: materials } = await supabase
+    .from("materials")
+    .select("id, name, kind, buy_unit")
+    .order("name", { ascending: true });
+  const { data: prices } = await supabase
+    .from("material_prices")
+    .select("id, material_id, price, qty, unit, effective_at");
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-3xl font-semibold">Resep baru</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Formulir lengkap datang di tahap berikutnya.
+          Susun bahan resep, HPP dihitung otomatis.
         </p>
       </div>
-      <Card className="border-dashed">
-        <CardHeader className="gap-2">
-          <CardTitle className="font-heading text-xl">
-            Formulir menyusul
-          </CardTitle>
-          <CardDescription>
-            Sementara ini cek halaman Resep untuk daftar yang sudah tersimpan.
-          </CardDescription>
-          <div className="mt-2">
-            <Button asChild variant="outline">
-              <Link href="/">Kembali ke Resep</Link>
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+      <RecipeForm materials={materials ?? []} prices={prices ?? []} />
     </div>
   );
 }
