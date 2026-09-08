@@ -91,6 +91,7 @@ export default async function MaterialsPage() {
                   <TableHead>Jenis</TableHead>
                   <TableHead>Unit beli</TableHead>
                   <TableHead className="text-right">Harga terakhir</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -120,6 +121,14 @@ export default async function MaterialsPage() {
                             Belum ada harga
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          href={`/materials/${m.id}/edit`}
+                          className="text-sm underline underline-offset-4 hover:text-foreground"
+                        >
+                          Ubah
+                        </Link>
                       </TableCell>
                     </TableRow>
                   );

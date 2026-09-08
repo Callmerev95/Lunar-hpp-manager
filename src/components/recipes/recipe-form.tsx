@@ -26,6 +26,7 @@ import { calculateRecipeCost, type MaterialRow } from "@/lib/costing/recipe";
 import { formatIDR } from "@/lib/format";
 import {
   createRecipeAction,
+  updateRecipeAction,
   type RecipeFormError,
 } from "@/app/(app)/recipes/actions";
 
@@ -38,25 +39,57 @@ type ItemRow = {
   unit: string;
 };
 
+export type RecipeInitial = {
+  recipe: {
+    id: string;
+    name: string;
+    output_qty: number;
+    output_unit: string;
+    margin_pct: number;
+    notes: string | null;
+  };
+  items: { material_id: string; qty: number; unit: string }[];
+};
+
 const OUTPUT_UNIT_OPTIONS = ["porsi", "pcs", "bungkus", "toples", "loaf"] as const;
 
 export function RecipeForm({
   materials,
   prices,
+  mode = "create",
+  initial,
 }: {
   materials: MaterialOption[];
   prices: PriceRow[];
+  mode?: "create" | "edit";
+  initial?: RecipeInitial;
 }) {
+  const action = mode === "edit" ? updateRecipeAction : createRecipeAction;
   const [error, formAction, pending] = useActionState<
     RecipeFormError | undefined,
     FormData
-  >(createRecipeAction, undefined);
+  >(action, undefined);
 
-  const [name, setName] = useState("");
-  const [outputQty, setOutputQty] = useState("");
-  const [outputUnit, setOutputUnit] = useState("porsi");
-  const [marginPct, setMarginPct] = useState("30");
-  const [items, setItems] = useState<ItemRow[]>([]);
+  const [name, setName] = useState(initial?.recipe.name ?? "");
+  const [outputQty, setOutputQty] = useState(
+    initial ? String(initial.recipe.output_qty) : "",
+  );
+  const [outputUnit, setOutputUnit] = useState(
+    initial?.recipe.output_unit ?? "porsi",
+  );
+  const [marginPct, setMarginPct] = useState(
+    initial ? String(initial.recipe.margin_pct) : "30",
+  );
+  const [items, setItems] = useState<ItemRow[]>(
+    initial
+      ? initial.items.map((item, i) => ({
+          key: i,
+          material_id: item.material_id,
+          qty: String(item.qty),
+          unit: item.unit,
+        }))
+      : [],
+  );
 
   const latest = useMemo(() => latestPrices(prices), [prices]);
 
@@ -130,6 +163,9 @@ export function RecipeForm({
           })),
         )}
       />
+      {mode === "edit" ? (
+        <input type="hidden" name="id" value={initial?.recipe.id} />
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -198,7 +234,12 @@ export function RecipeForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="notes">Catatan</Label>
-            <Input id="notes" name="notes" placeholder="Opsional" />
+            <Input
+              id="notes"
+              name="notes"
+              defaultValue={initial?.recipe.notes ?? undefined}
+              placeholder="Opsional"
+            />
           </div>
         </CardContent>
       </Card>
@@ -353,7 +394,11 @@ export function RecipeForm({
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button type="submit" disabled={pending}>
-          {pending ? "Menyimpan..." : "Simpan resep"}
+          {pending
+            ? "Menyimpan..."
+            : mode === "edit"
+              ? "Simpan perubahan"
+              : "Simpan resep"}
         </Button>
       </div>
     </form>

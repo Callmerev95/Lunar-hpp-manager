@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -70,12 +71,17 @@ export default async function RecipeDetailPage({
             {formatDate(recipe.created_at)}
           </p>
         </div>
-        <form action={deleteRecipeAction}>
-          <input type="hidden" name="id" value={recipe.id} />
-          <Button type="submit" variant="outline" className="text-destructive">
-            Hapus resep
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href={`/recipes/${recipe.id}/edit`}>Ubah</Link>
           </Button>
-        </form>
+          <form action={deleteRecipeAction}>
+            <input type="hidden" name="id" value={recipe.id} />
+            <Button type="submit" variant="outline" className="text-destructive">
+              Hapus resep
+            </Button>
+          </form>
+        </div>
       </div>
 
       <Card>

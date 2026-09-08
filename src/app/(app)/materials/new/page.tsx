@@ -13,7 +13,7 @@ export default function NewMaterialPage() {
           Simpan bahan atau kemasan yang sering kamu pakai.
         </p>
       </div>
-      <MaterialForm />
+      <MaterialForm mode="create" />
     </div>
   );
 }
