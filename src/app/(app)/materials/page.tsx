@@ -8,9 +8,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { latestPrices } from "@/lib/costing/prices";
+import { formatIDR, formatDate } from "@/lib/format";
 
 export const metadata = {
   title: "Bahan - Catatan HPP",
+};
+
+const KIND_LABELS: Record<string, string> = {
+  raw: "Bahan baku",
+  packaging: "Kemasan",
 };
 
 export default async function MaterialsPage() {
@@ -20,9 +35,16 @@ export default async function MaterialsPage() {
     .select("id, name, kind, buy_unit")
     .order("name", { ascending: true });
 
+  const { data: prices } = await supabase
+    .from("material_prices")
+    .select("id, material_id, price, qty, unit, effective_at")
+    .order("effective_at", { ascending: true });
+
+  const latest = latestPrices(prices ?? []);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-3xl font-semibold">Bahan</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -58,9 +80,53 @@ export default async function MaterialsPage() {
               {materials.length} bahan
             </CardTitle>
             <CardDescription>
-              Tabel bahan lengkap datang di tahap berikutnya.
+              Harga yang dipakai adalah yang paling baru.
             </CardDescription>
           </CardHeader>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nama</TableHead>
+                  <TableHead>Jenis</TableHead>
+                  <TableHead>Unit beli</TableHead>
+                  <TableHead className="text-right">Harga terakhir</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {materials.map((m) => {
+                  const p = latest.get(m.id);
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell className="font-medium">{m.name}</TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {KIND_LABELS[m.kind] ?? m.kind}
+                        </span>
+                      </TableCell>
+                      <TableCell>{m.buy_unit}</TableCell>
+                      <TableCell className="text-right">
+                        {p ? (
+                          <span className="flex flex-col">
+                            <span className="tabular-nums">
+                              {formatIDR(p.price)} / {p.qty} {p.unit}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              sejak {formatDate(p.effective_at)}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            Belum ada harga
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
       )}
     </div>
