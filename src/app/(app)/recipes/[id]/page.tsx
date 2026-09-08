@@ -71,7 +71,17 @@ export default async function RecipeDetailPage({
             {formatDate(recipe.created_at)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href={`/recipes/${recipe.id}/export?format=xlsx`}>
+              Unduh Excel
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/recipes/${recipe.id}/export?format=csv`}>
+              Unduh CSV
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link href={`/recipes/${recipe.id}/edit`}>Ubah</Link>
           </Button>
